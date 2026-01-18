@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมร้อยกำไลลูกปัด หรรษา - โรงเรียนบ้านใหม่วัฒนา</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #e0f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            background-image: radial-gradient(#e0f7fa 10%, #b2ebf2 90%);
+            overflow-x: hidden;
+        }
+
+        /* --- 1. หน้าลงชื่อ (Login Screen) --- */
+        #login-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #ffffff 0%, #e1f5fe 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            text-align: center;
+            padding: 10px; /* ลด Padding กันล้น */
+        }
+
+        /* ปุ่มโหมดครู */
+        .admin-btn {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: #546e7a; color: white; border: none;
+            padding: 8px 15px; border-radius: 20px; cursor: pointer;
+            font-family: 'Sarabun'; font-size: 0.9rem; font-weight: bold;
+            display: flex; align-items: center; gap: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: 0.3s;
+        }
+        .admin-btn:hover { background: #37474f; transform: translateY(2px); }
+
+        /* ปรับขนาดโลโก้ให้เล็กลง */
+        .school-logo {
+            width: 90px; height: 90px; object-fit: contain; margin-bottom: 5px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+        
+        .school-header h1 { margin: 0; font-size: 1.4rem; color: #1565c0; }
+        .school-header p { margin: 2px 0 0; color: #546e7a; font-size: 1rem; }
+
+        /* ชื่อเกม 3D (ปรับให้เล็กลง และสีเข้มขึ้น) */
+        .game-main-title {
+            font-size: 2.2rem; /* ลดขนาดลง */
+            font-weight: 800;
+            color: #ef6c00; /* สีส้มเข้ม */
+            text-align: center;
+            margin: 15px 0 20px;
+            line-height: 1.1;
+            /* เงาสีเข้มขึ้นเพื่อให้อ่านง่าย */
+            text-shadow:
+                0 2px 0 #e65100,
+                0 3px 0 #bf360c,
+                0 4px 0 #3e2723,
+                0 6px 12px rgba(0,0,0,0.2);
+            letter-spacing: 1px;
+        }
+
+        .login-box {
+            background: white; padding: 25px; border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px;
+            border: 2px solid #ffffff; 
+            /* margin-top เอาออกเพื่อให้กระชับ */
+        }
+        
+        .form-group { margin-bottom: 12px; text-align: left; }
+        .form-label { display: block; font-weight: bold; margin-bottom: 5px; color: #455a64; font-size: 1rem;}
+        .form-input {
+            width: 100%; padding: 10px; border: 2px solid #cfd8dc; border-radius: 10px;
+            font-family: 'Sarabun'; font-size: 1rem; box-sizing: border-box;
+        }
+        .form-input:focus { border-color: #29b6f6; outline: none; }
+        
+        .start-btn {
+            background: linear-gradient(to right, #4caf50, #00897b);
+            color: white; font-size: 1.2rem; padding: 12px 40px; border-radius: 50px;
+            border: none; cursor: pointer; box-shadow: 0 5px 15px rgba(0,137,123, 0.3);
+            width: 100%; margin-top: 10px; font-weight: bold;
+        }
+        .start-btn:active { transform: translateY(3px); box-shadow: 0 2px 5px rgba(0,137,123, 0.2); }
+
+        /* --- 2. หน้าเกม (Game Screen) --- */
+        #game-screen {
+            display: none; width: 100%; max-width: 1000px; padding: 15px; box-sizing: border-box;
+            flex-direction: column;
+        }
+
+        .student-info-bar {
+            background: white; padding: 8px 15px; border-radius: 15px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #2196f3;
+        }
+        .student-details { font-size: 0.95rem; }
+        .student-details span { font-weight: bold; color: #0277bd; margin-right: 10px; }
+
+        /* ปุ่มกลับหน้าหลัก */
+        .home-btn {
+            background: #ff7043; color: white; border: none; padding: 5px 12px;
+            border-radius: 15px; cursor: pointer; font-family: 'Sarabun'; font-weight: bold; font-size: 0.9rem;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .home-btn:hover { background: #d84315; }
+
+        /* Game UI Components */
+        .goal-panel {
+            background: #fffde7; border: 3px dashed #fbc02d; border-radius: 20px; padding: 10px;
+            text-align: center; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap;
+        }
+        .loop-badge {
+            background: #fdd835; color: #333; padding: 5px 20px; border-radius: 30px;
+            font-weight: bold; font-size: 1.1rem; animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.05);} 100% {transform: scale(1);} }
+
+        .workspace { display: flex; gap: 15px; min-height: 400px; }
+        .sidebar { flex: 0 0 160px; background: #fff3e0; border: 2px solid #ffe0b2; border-radius: 15px; padding: 10px; text-align: center; }
+        .board { flex: 1; background: #f1f8e9; border: 2px solid #a5d6a7; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; }
+        
+        .pattern-box {
+            background: white; border: 2px dashed #bdbdbd; border-radius: 15px; padding: 15px;
+            flex: 1; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 4px; margin-bottom: 15px; position: relative;
+        }
+        .placeholder { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #b0bec5; width: 100%; text-align: center; font-size: 0.9rem;}
+
+        .input-wrapper {
+            background: #e1f5fe; padding: 8px 25px; border-radius: 40px; border: 2px solid #81d4fa;
+            align-self: center; display: flex; align-items: center; gap: 10px;
+        }
+        .loop-input {
+            width: 60px; height: 35px; font-size: 1.3rem; text-align: center;
+            border: 3px solid #039be5; border-radius: 10px; color: #0277bd; font-weight: bold;
+        }
+
+        /* Beads */
+        .bead { border-radius: 50%; cursor: pointer; box-shadow: 2px 3px 5px rgba(0,0,0,0.2); transition: transform 0.1s; border: 1px solid rgba(255,255,255,0.5); }
+        .bead:active { transform: scale(0.9); }
+        .pink { background: radial-gradient(circle at 30% 30%, #ff80ab, #e91e63); }
+        .orange { background: radial-gradient(circle at 30% 30%, #ffcc80, #ef6c00); }
+        .blue { background: radial-gradient(circle at 30% 30%, #81d4fa, #0288d1); }
+        .green { background: radial-gradient(circle at 30% 30%, #a5d6a7, #2e7d32); }
+        .lg { width: 50px; height: 50px; }
+        .sm { width: 32px; height: 32px; }
+        .palette-grid { display: grid; grid-template-columns: 1fr; gap: 8px; justify-items: center; }
+
+        .controls { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
+        .btn { padding: 10px 25px; border-radius: 30px; border: none; font-size: 1rem; cursor: pointer; color: white; font-family: 'Sarabun'; font-weight: bold;}
+        .btn-submit { background: #43a047; box-shadow: 0 4px #2e7d32; }
+        .btn-reset { background: #ff7043; box-shadow: 0 4px #d84315; }
+
+        /* --- 3. Admin Panel --- */
+        #admin-panel {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 200; overflow-y: auto; padding: 20px; box-sizing: border-box;
+        }
+        .admin-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px;
+        }
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem;}
+        .data-table th, .data-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .data-table th { background-color: #f5f5f5; color: #333; }
+        
+        .close-admin-btn { background: #f44336; color: white; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; }
+        .clear-data-btn { background: #ff9800; color: white; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; margin-right: 5px;}
+
+        /* Modal */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .modal-content { background-color: white; padding: 25px; border-radius: 20px; text-align: center; width: 90%; max-width: 450px; border: 4px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .grade-badge { display: block; padding: 10px; color: white; font-weight: bold; font-size: 1.3rem; border-radius: 10px; margin-top: 10px; }
+
+        @media (max-width: 768px) {
+            #login-screen { justify-content: center; padding-top: 0; }
+            .game-main-title { font-size: 1.8rem; margin: 10px 0 15px; } /* ลดขนาดฟอนต์มือถือ */
+            .workspace { flex-direction: column; height: auto; min-height: auto; }
+            .sidebar { flex: none; overflow-x: auto; padding: 8px;}
+            .palette-grid { grid-template-columns: repeat(6, 1fr); }
+            .student-info-bar { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .home-btn { position: absolute; top: 8px; right: 8px; }
+            .goal-panel { gap: 10px; }
+            .loop-badge { font-size: 1rem; padding: 5px 15px; }
+        }
+    </style>
+</head>
+<body onload="checkDailyReset()">
+
+    <audio id="bgm" loop> <source src="bgm.mp3" type="audio/mpeg"> </audio>
+    <audio id="sfx-collect"> <source src="collect.mp3" type="audio/mpeg"> </audio>
+    <audio id="sfx-win"> <source src="win.mp3" type="audio/mpeg"> </audio>
+    <audio id="sfx-wrong"> <source src="wrong.mp3" type="audio/mpeg"> </audio>
+
+    <div id="login-screen">
+        <button class="admin-btn" onclick="openTeacherMode()">👨‍🏫 โหมดครู</button>
+        
+        <img src="logo.png" alt="Logo" class="school-logo">
+        <div class="school-header">
+            <h1>โรงเรียนบ้านใหม่วัฒนา</h1>
+            <p>วิชาคอมพิวเตอร์ | ครูผู้สอน: ครูขันทอง โพธิ์เตี้ย</p>
+        </div>
+
+        <div class="game-main-title">ร้อยกำไลลูกปัด หรรษา</div>
+
+        <div class="login-box">
+            <h2 style="margin-top:0; color:#00796b; text-align: center; font-size: 1.3rem;">ลงชื่อเข้าเรียน</h2>
+            <div class="form-group">
+                <label class="form-label">ชื่อ - นามสกุล</label>
+                <input type="text" id="student-name" class="form-input" placeholder="เช่น ด.ช.รักเรียน ขยันยิ่ง">
+            </div>
+            <div class="form-group">
+                <label class="form-label">เลขประจำตัว</label>
+                <input type="number" id="student-id" class="form-input" placeholder="เช่น 12345">
+            </div>
+            <div class="form-group">
+                <label class="form-label">ระดับชั้น</label>
+                <select id="student-grade" class="form-input">
+                    <option value="">-- เลือกระดับชั้น --</option>
+                    <option value="ป.1">ประถมศึกษาปีที่ 1</option>
+                    <option value="ป.2">ประถมศึกษาปีที่ 2</option>
+                    <option value="ป.3">ประถมศึกษาปีที่ 3</option>
+                    <option value="ป.4">ประถมศึกษาปีที่ 4</option>
+                    <option value="ป.5">ประถมศึกษาปีที่ 5</option>
+                    <option value="ป.6">ประถมศึกษาปีที่ 6</option>
+                </select>
+            </div>
+            <button class="start-btn" onclick="validateLogin()">เข้าสู่บทเรียน ➡️</button>
+        </div>
+    </div>
+
+    <div id="game-screen">
+        <div class="student-info-bar">
+            <div class="student-details">
+                <span id="display-name">ชื่อ: -</span>
+                <span id="display-id">เลขที่: -</span>
+                <span id="display-grade">ชั้น: -</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="font-weight:bold; color:#2e7d32; font-size: 0.9rem;">คะแนน: <span id="score-text">100</span></div>
+                <button class="home-btn" onclick="goHome()">🏠 หน้าหลัก</button>
+            </div>
+        </div>
+
+        <div class="goal-panel">
+            <div style="font-weight:bold; color:#ef6c00; font-size:1.1rem;">🎯 โจทย์: ร้อยลูกปัดตามแบบให้ครบ และใส่ตัวเลขตามป้ายสีเหลือง</div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div id="goal-preview" style="background:rgba(255,255,255,0.6); padding:5px 10px; border-radius:10px; display:flex; align-items:center;"></div>
+                <div class="loop-badge" id="goal-loop-text">ทำซ้ำ ? รอบ</div>
+            </div>
+        </div>
+
+        <div class="workspace">
+            <div class="sidebar">
+                <div style="font-weight:bold; color:#ef6c00; margin-bottom:10px; font-size: 0.9rem;">คลังลูกปัด</div>
+                <div class="palette-grid">
+                    <div class="bead pink lg" onclick="addBead('pink-lg')"></div>
+                    <div class="bead pink sm" onclick="addBead('pink-sm')"></div>
+                    <div class="bead orange lg" onclick="addBead('orange-lg')"></div>
+                    <div class="bead orange sm" onclick="addBead('orange-sm')"></div>
+                    <div class="bead blue lg" onclick="addBead('blue-lg')"></div>
+                    <div class="bead green sm" onclick="addBead('green-sm')"></div>
+                </div>
+            </div>
+
+            <div class="board">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <div style="font-weight:bold; color:#2e7d32; font-size: 0.95rem;">แบบลายของฉัน (Pattern)</div>
+                    <button onclick="undo()" style="background:#cfd8dc; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-size: 0.9rem;">↩ ย้อนกลับ</button>
+                </div>
+                <div class="pattern-box" id="user-box">
+                    <div class="placeholder">จิ้มลูกปัดด้านซ้าย เพื่อเริ่มร้อยกำไล...</div>
+                </div>
+                <div class="input-wrapper">
+                    <span style="font-size:1.5rem;">🔄</span>
+                    <span style="font-weight:bold; color:#01579b;">วนซ้ำ (Loop):</span>
+                    <input type="number" id="loop-input" class="loop-input" placeholder="?">
+                    <span style="font-weight:bold; color:#01579b;">รอบ</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-reset" onclick="initLevel()">เริ่มใหม่</button>
+            <button class="btn btn-submit" onclick="checkAnswer()">✅ ส่งคำตอบ</button>
+        </div>
+    </div>
+
+    <div id="admin-panel">
+        <div class="admin-header">
+            <div>
+                <h3 style="margin:0; color:#37474f;">👨‍🏫 ติดตามผลงานนักเรียน</h3>
+                <p style="margin:5px 0 0; color:#78909c; font-size: 0.9rem;">วันที่: <span id="admin-date"></span></p>
+            </div>
+            <div>
+                <button class="clear-data-btn" onclick="clearDataManual()">🗑️ ล้างวันนี้</button>
+                <button class="close-admin-btn" onclick="closeAdmin()">ปิด</button>
+            </div>
+        </div>
+        
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>เวลา</th>
+                    <th>ชื่อ</th>
+                    <th>เลขที่</th>
+                    <th>ชั้น</th>
+                    <th>คะแนน</th>
+                    <th>เกรด</th>
+                </tr>
+            </thead>
+            <tbody id="admin-table-body"></tbody>
+        </table>
+        <div id="no-data-msg" style="text-align:center; padding:20px; color:#999;">ยังไม่มีข้อมูล</div>
+    </div>
+
+    <div id="result-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title" style="color:#2e7d32; margin-top:0;">🎉 สรุปผล</h2>
+            <div id="report-card" style="background:#f5f5f5; padding:15px; border-radius:10px; text-align:left; margin:15px 0; border-left:5px solid #aaa;">
+                <div><b>ชื่อ:</b> <span id="report-name"></span></div>
+                <div><b>คะแนน:</b> <span id="report-score" style="font-weight:bold;"></span> / 100</div>
+                <div id="grade-badge" class="grade-badge"></div>
+            </div>
+            <div id="modal-msg" style="color:#546e7a;"></div>
+            <button class="btn btn-submit" onclick="closeModal()" id="modal-btn">ข้อต่อไป ➡️</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Data & Storage ---
+        let studentData = { name: '', id: '', grade: '' };
+        let currentScore = 100;
+        const beads = ['pink-lg', 'pink-sm', 'orange-lg', 'orange-sm', 'blue-lg', 'green-sm'];
+        let targetUnit = [], targetLoop = 0, userPattern = [], isComplete = false;
+
+        // --- System: Daily Reset & Storage ---
+        const DB_KEY = 'BanMaiGameData_V2';
+        
+        function checkDailyReset() {
+            const today = new Date().toLocaleDateString('th-TH');
+            const stored = JSON.parse(localStorage.getItem(DB_KEY) || '{"date": "", "records": []}');
+            if (stored.date !== today) {
+                localStorage.setItem(DB_KEY, JSON.stringify({ date: today, records: [] }));
+            }
+            document.getElementById('admin-date').innerText = today;
+        }
+
+        function saveToDB(score, grade) {
+            const today = new Date().toLocaleDateString('th-TH');
+            const time = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            const stored = JSON.parse(localStorage.getItem(DB_KEY) || `{"date": "${today}", "records": []}`);
+            stored.records.push({
+                time: time, name: studentData.name, id: studentData.id, gradeLevel: studentData.grade, score: score, gradeResult: grade
+            });
+            localStorage.setItem(DB_KEY, JSON.stringify(stored));
+        }
+
+        // --- 1. Login & Home Logic ---
+        function validateLogin() {
+            const name = document.getElementById('student-name').value.trim();
+            const id = document.getElementById('student-id').value.trim();
+            const grade = document.getElementById('student-grade').value;
+            if(!name || !id || !grade) { alert("กรุณากรอกข้อมูลให้ครบถ้วน"); return; }
+            studentData = { name, id, grade };
+            document.getElementById('display-name').innerHTML = `ชื่อ: <span>${name}</span>`;
+            document.getElementById('display-id').innerHTML = `เลขที่: <span>${id}</span>`;
+            document.getElementById('display-grade').innerHTML = `ชั้น: <span>${grade}</span>`;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+            const bgm = document.getElementById('bgm'); bgm.volume = 0.2; bgm.play().catch(()=>{});
+            initLevel();
+        }
+
+        function goHome() {
+            if(confirm("ต้องการออกจากระบบและกลับหน้าหลักหรือไม่?")) { location.reload(); }
+        }
+
+        // --- 2. Teacher Mode Logic ---
+        function openTeacherMode() {
+            const pass = prompt("กรุณาใส่รหัสผ่านสำหรับครูผู้สอน:");
+            if (pass === "1234") { renderAdminTable(); document.getElementById('admin-panel').style.display = 'block'; }
+            else if (pass !== null) { alert("รหัสผ่านไม่ถูกต้อง"); }
+        }
+        function closeAdmin() { document.getElementById('admin-panel').style.display = 'none'; }
+        function renderAdminTable() {
+            const stored = JSON.parse(localStorage.getItem(DB_KEY) || '{"records": []}');
+            const tbody = document.getElementById('admin-table-body'); tbody.innerHTML = '';
+            if (stored.records.length === 0) { document.getElementById('no-data-msg').style.display = 'block'; }
+            else {
+                document.getElementById('no-data-msg').style.display = 'none';
+                stored.records.slice().reverse().forEach(rec => {
+                    tbody.innerHTML += `<tr><td>${rec.time}</td><td>${rec.name}</td><td>${rec.id}</td><td>${rec.gradeLevel}</td><td><b>${rec.score}</b></td><td>${rec.gradeResult}</td></tr>`;
+                });
+            }
+        }
+        function clearDataManual() {
+            if(confirm("คุณแน่ใจหรือไม่ที่จะลบข้อมูลทั้งหมดของวันนี้?")) {
+                localStorage.setItem(DB_KEY, JSON.stringify({ date: new Date().toLocaleDateString('th-TH'), records: [] }));
+                renderAdminTable();
+            }
+        }
+
+        // --- 3. Game Logic ---
+        function initLevel() {
+            userPattern = []; currentScore = 100; isComplete = false;
+            document.getElementById('score-text').innerText = currentScore;
+            document.getElementById('loop-input').value = '';
+            renderUserBox();
+            targetLoop = Math.floor(Math.random() * 4) + 3;
+            targetUnit = [];
+            const len = Math.floor(Math.random() * 2) + 2;
+            for(let i=0; i<len; i++) targetUnit.push(beads[Math.floor(Math.random() * beads.length)]);
+            renderGoal();
+        }
+        function renderGoal() {
+            const div = document.getElementById('goal-preview'); div.innerHTML = '';
+            targetUnit.forEach(b => div.appendChild(createBead(b, 40)));
+            const dots = document.createElement('span'); dots.innerText = '...'; dots.style.fontSize='24px'; dots.style.color='#ef6c00'; dots.style.margin='0 5px';
+            div.appendChild(dots);
+            document.getElementById('goal-loop-text').innerText = `ทำซ้ำ ${targetLoop} รอบ`;
+        }
+        function createBead(type, size) {
+            const el = document.createElement('div'); const parts = type.split('-');
+            el.className = `bead ${parts[0]} ${parts[1]}`;
+            let s = size || 50; if(parts[1]==='sm') s *= 0.7;
+            el.style.width = s+'px'; el.style.height = s+'px'; el.style.margin = '2px';
+            return el;
+        }
+        function addBead(type) { if(isComplete) return; playSound('sfx-collect'); userPattern.push(type); renderUserBox(); }
+        function undo() { if(isComplete) return; userPattern.pop(); renderUserBox(); }
+        function renderUserBox() {
+            const box = document.getElementById('user-box'); box.innerHTML = '';
+            if(userPattern.length === 0) { box.innerHTML = '<div class="placeholder">จิ้มลูกปัดด้านซ้าย เพื่อเริ่มร้อยกำไล...</div>'; return; }
+            userPattern.forEach(b => box.appendChild(createBead(b, 50)));
+        }
+        function playSound(id) { const s = document.getElementById(id); if(s){s.currentTime=0; s.play().catch(()=>{});} }
+        function checkAnswer() {
+            if(isComplete) return;
+            const inputLoop = parseInt(document.getElementById('loop-input').value);
+            if(isNaN(inputLoop) || userPattern.length === 0) { showSimpleModal('⚠️ ข้อมูลไม่ครบ', 'อย่าลืมร้อยลูกปัด และใส่ตัวเลขให้ครบนะ'); return; }
+            let fullTarget = []; for(let i=0; i<targetLoop; i++) fullTarget = fullTarget.concat(targetUnit);
+            if(inputLoop === targetLoop && JSON.stringify(userPattern) === JSON.stringify(fullTarget)) {
+                isComplete = true; playSound('sfx-win'); showReportCard();
+            } else {
+                playSound('sfx-wrong'); currentScore -= 10; if(currentScore < 0) currentScore = 0;
+                document.getElementById('score-text').innerText = currentScore;
+                showSimpleModal('❌ ยังไม่ถูกต้อง', 'ลองตรวจสอบจำนวนรอบ หรือลายลูกปัดอีกทีนะ<br>(หัก 10 คะแนน)');
+            }
+        }
+        function showReportCard() {
+            document.getElementById('report-name').innerText = studentData.name;
+            document.getElementById('report-score').innerText = currentScore;
+            document.getElementById('report-card').style.display = "block";
+            let gradeText = "", bg = "";
+            if(currentScore >= 90) { gradeText = "ดีมาก (Excellent)"; bg = "#4caf50"; }
+            else if(currentScore >= 80) { gradeText = "ดี (Good)"; bg = "#1976d2"; }
+            else if(currentScore >= 70) { gradeText = "พอใช้ (Fair)"; bg = "#fbc02d"; }
+            else { gradeText = "ปรับปรุง (Try Harder)"; bg = "#d32f2f"; }
+            const badge = document.getElementById('grade-badge');
+            badge.innerText = gradeText; badge.style.backgroundColor = bg;
+            document.getElementById('report-card').style.borderLeftColor = bg;
+            document.getElementById('modal-msg').innerHTML = "บันทึกคะแนนเรียบร้อยแล้ว";
+            saveToDB(currentScore, gradeText);
+            const btn = document.getElementById('modal-btn'); btn.innerText = "ข้อต่อไป ➡️"; btn.onclick = function() { closeModal(); initLevel(); };
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+        function showSimpleModal(head, body) {
+            document.getElementById('modal-title').innerText = head;
+            document.getElementById('modal-title').style.color = head.includes('⚠️') ? '#f57f17' : '#c62828';
+            document.getElementById('report-card').style.display = "none";
+            document.getElementById('modal-msg').innerHTML = body;
+            const btn = document.getElementById('modal-btn'); btn.innerText = "ตกลง"; btn.onclick = closeModal;
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+        function closeModal() { document.getElementById('result-modal').style.display = 'none'; }
+    </script>
+</body>
+</html>
